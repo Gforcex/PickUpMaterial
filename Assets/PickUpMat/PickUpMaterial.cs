@@ -116,9 +116,8 @@ public class PickUpMaterial : MonoBehaviour
             }
             else
             {
-                MeshFilter mf = _allRenderers[i].GetComponent<MeshFilter>();
                 Renderer r = _allRenderers[i];
-                if (mf != null && r != null)
+                if (r != null)
                 {
                     for (int j = 0; j < r.sharedMaterials.Length; ++j)
                     {
