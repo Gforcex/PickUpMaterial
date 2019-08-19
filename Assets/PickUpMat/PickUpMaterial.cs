@@ -14,7 +14,7 @@ public class PickUpMaterial : MonoBehaviour
 
     public bool enableAsync = true;
 
-    private static readonly float ScaleCoordinate = 1.0f;
+    private static readonly float ScaleCoordinate = 0.25f;
     private static readonly int MaxMaterialCount = 43;
     private static Material[] _pickupMats = new Material[MaxMaterialCount];
 
