@@ -109,6 +109,7 @@ public class PickUpMaterial : MonoBehaviour
                     if (smr.sharedMaterials[j] == null) continue;
 
                     _command.DrawRenderer(smr, _pickupMats[matID], j);
+                    setMaterial(_pickupMats[matID], smr.sharedMaterials[j]);
                     _matIdDic.Add(matID, smr.sharedMaterials[j]);
                     matID++;
 
@@ -124,6 +125,7 @@ public class PickUpMaterial : MonoBehaviour
                         if (r.sharedMaterials[j] == null) continue;
 
                         _command.DrawRenderer(r, _pickupMats[matID], j);
+                        setMaterial(_pickupMats[matID], r.sharedMaterials[j]);
                         _matIdDic.Add(matID, r.sharedMaterials[j]);
                         matID++;
                     }
@@ -132,6 +134,33 @@ public class PickUpMaterial : MonoBehaviour
         }
 
         Graphics.ExecuteCommandBuffer(_command);
+    }
+
+    private void setMaterial(Material desc, Material src)
+    {
+        string baseMap = "_BaseMap";
+        string srcMap = "_BaseMap";
+        bool find = true;
+        if (src.GetTexture(baseMap) == null)
+        {
+            if (src.GetTexture("_MainTex") != null)
+            {
+                srcMap = "_MainTex";
+            }
+            else
+            {
+                find = false;
+                desc.SetTexture("_BaseMap", null);
+            }
+
+        }
+
+        if(find)
+        {
+            desc.SetTexture(baseMap, src.GetTexture(srcMap));
+            desc.SetTextureOffset(baseMap, src.GetTextureOffset(srcMap));
+            desc.SetTextureScale(baseMap, src.GetTextureScale(srcMap));
+        }
     }
 
     private void callBack(Color32 color)

@@ -5,6 +5,7 @@ Shader "Hidden/PickUpMaterial"
 	Properties
 	{
 		_MaterialID("MaterialID", Int) = 0
+		_BaseMap("Base Color", 2D) = "white" {}
 	}
 	
 	SubShader
@@ -33,21 +34,24 @@ Shader "Hidden/PickUpMaterial"
             };
 
 			int _MaterialID;
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+            sampler2D _BaseMap;
+            float4 _BaseMap_ST;
+			float _Cutoff;
 
             Varyings vert(Attributes input)
             {
                 Varyings output = (Varyings)0;
 
 				output.positionCS = UnityObjectToClipPos(input.positionOS);
-				output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+				output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
 
                 return output;
             }
 
             half4 frag(Varyings input) : SV_Target
             {
+				clip(tex2D(_BaseMap, input.uv).a - _Cutoff);
+
                 return (float)_MaterialID/255;
             }
             ENDHLSL
