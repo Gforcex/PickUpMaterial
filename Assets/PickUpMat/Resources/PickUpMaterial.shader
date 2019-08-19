@@ -6,12 +6,17 @@ Shader "Hidden/PickUpMaterial"
 	{
 		_MaterialID("MaterialID", Int) = 0
 		_BaseMap("Base Color", 2D) = "white" {}
+		_Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0
 	}
 	
 	SubShader
 	{
 		Pass
 		{
+			ZWrite On
+			Blend Off
+			//Cull Off
+
 			Name "Unlit"
 			HLSLPROGRAM
 			#pragma prefer_hlslcc gles
@@ -50,7 +55,7 @@ Shader "Hidden/PickUpMaterial"
 
             half4 frag(Varyings input) : SV_Target
             {
-				clip(tex2D(_BaseMap, input.uv).a - _Cutoff);
+				//clip(tex2D(_BaseMap, input.uv).a - _Cutoff);
 
                 return (float)_MaterialID/255;
             }

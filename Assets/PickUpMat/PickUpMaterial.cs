@@ -12,7 +12,9 @@ public class PickUpMaterial : MonoBehaviour
 {
     public delegate void OnPickUp(Material mat);
 
-    private static readonly float ScaleCoordinate = 0.25f;
+    public bool enableAsync = true;
+
+    private static readonly float ScaleCoordinate = 1.0f;
     private static readonly int MaxMaterialCount = 43;
     private static Material[] _pickupMats = new Material[MaxMaterialCount];
 
@@ -54,13 +56,15 @@ public class PickUpMaterial : MonoBehaviour
 
         x = (int)((float)x * ScaleCoordinate);
         y = (int)((float)y * ScaleCoordinate);
-        y = _pickupRT.height - y;
+
+        //if (SystemInfo.supportsAsyncGPUReadback && enableAsync)
+            y = _pickupRT.height - y;
 
         _pickupCam = cam;
 
         drawRenderers();
 
-        if (SystemInfo.supportsAsyncGPUReadback)
+        if (SystemInfo.supportsAsyncGPUReadback && enableAsync)
         {
             _requesting = true;
             _request = AsyncGPUReadback.Request(_pickupRT, 0, x, 1, y, 1, 0, 1, callAction);
@@ -94,7 +98,9 @@ public class PickUpMaterial : MonoBehaviour
         //Matrix4x4 projectionMatrix = Matrix4x4.Perspective(_pickupCam.fieldOfView, cameraAspect,
         //                        _pickupCam.nearClipPlane, _pickupCam.farClipPlane);
         //_command.SetViewProjectionMatrices(_pickupCam.worldToCameraMatrix, projectionMatrix);
-        _command.SetViewProjectionMatrices(_pickupCam.worldToCameraMatrix, GL.GetGPUProjectionMatrix(_pickupCam.projectionMatrix, true));       
+
+        _command.SetViewProjectionMatrices(_pickupCam.worldToCameraMatrix, _pickupCam.projectionMatrix);
+        //_command.SetViewProjectionMatrices(_pickupCam.worldToCameraMatrix, GL.GetGPUProjectionMatrix(_pickupCam.projectionMatrix, true));       
         //_command.SetViewport(_pickupCam.rect);
 
         int matID = 0;
@@ -109,7 +115,7 @@ public class PickUpMaterial : MonoBehaviour
                     if (smr.sharedMaterials[j] == null) continue;
 
                     _command.DrawRenderer(smr, _pickupMats[matID], j);
-                    setMaterial(_pickupMats[matID], smr.sharedMaterials[j]);
+                    //setMaterial(_pickupMats[matID], smr.sharedMaterials[j]);
                     _matIdDic.Add(matID, smr.sharedMaterials[j]);
                     matID++;
 
@@ -125,7 +131,7 @@ public class PickUpMaterial : MonoBehaviour
                         if (r.sharedMaterials[j] == null) continue;
 
                         _command.DrawRenderer(r, _pickupMats[matID], j);
-                        setMaterial(_pickupMats[matID], r.sharedMaterials[j]);
+                        //setMaterial(_pickupMats[matID], r.sharedMaterials[j]);
                         _matIdDic.Add(matID, r.sharedMaterials[j]);
                         matID++;
                     }
@@ -138,29 +144,29 @@ public class PickUpMaterial : MonoBehaviour
 
     private void setMaterial(Material desc, Material src)
     {
+        if (!src.HasProperty("_Cutoff"))
+            return;
+
         string baseMap = "_BaseMap";
         string srcMap = "_BaseMap";
-        bool find = true;
-        if (src.GetTexture(baseMap) == null)
+        if (!src.HasProperty(baseMap))
         {
-            if (src.GetTexture("_MainTex") != null)
+            if (src.HasProperty("_MainTex"))
             {
                 srcMap = "_MainTex";
             }
             else
             {
-                find = false;
-                desc.SetTexture("_BaseMap", null);
+                desc.SetTexture(baseMap, null);
+                return;
             }
 
         }
 
-        if(find)
-        {
-            desc.SetTexture(baseMap, src.GetTexture(srcMap));
-            desc.SetTextureOffset(baseMap, src.GetTextureOffset(srcMap));
-            desc.SetTextureScale(baseMap, src.GetTextureScale(srcMap));
-        }
+        desc.SetTexture(baseMap, src.GetTexture(srcMap));
+        desc.SetTextureOffset(baseMap, src.GetTextureOffset(srcMap));
+        desc.SetTextureScale(baseMap, src.GetTextureScale(srcMap));
+        desc.SetFloat("_Cutoff", src.GetFloat("_Cutoff"));
     }
 
     private void callBack(Color32 color)
@@ -203,7 +209,7 @@ public class PickUpMaterial : MonoBehaviour
             //}
             //else
             {
-                _pickupRT = new RenderTexture(rtW, rtH, 16, RenderTextureFormat.Default);
+                _pickupRT = new RenderTexture(rtW, rtH, 32, RenderTextureFormat.Default);
             }
             
             _pickupRT.autoGenerateMips = false;
@@ -257,9 +263,14 @@ public class PickUpMaterial : MonoBehaviour
         if(_command != null)
             _command.Release();
     }
+
+    //for test
     private void LateUpdate()
     {
-        //for test
+        //SetPickupInfo(GameObject.Find("GameObject"), null);
+        //_pickupCam = Camera.main;
+        //drawRenderers();
+      
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 pos = Input.mousePosition;
