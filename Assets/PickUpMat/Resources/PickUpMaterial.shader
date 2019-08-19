@@ -55,7 +55,7 @@ Shader "Hidden/PickUpMaterial"
 
             half4 frag(Varyings input) : SV_Target
             {
-				//clip(tex2D(_BaseMap, input.uv).a - _Cutoff);
+				clip(tex2D(_BaseMap, input.uv).a - _Cutoff);
 
                 return (float)_MaterialID/255;
             }

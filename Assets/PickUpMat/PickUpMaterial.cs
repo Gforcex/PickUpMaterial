@@ -115,7 +115,7 @@ public class PickUpMaterial : MonoBehaviour
                     if (smr.sharedMaterials[j] == null) continue;
 
                     _command.DrawRenderer(smr, _pickupMats[matID], j);
-                    //setMaterial(_pickupMats[matID], smr.sharedMaterials[j]);
+                    setMaterial(_pickupMats[matID], smr.sharedMaterials[j]);
                     _matIdDic.Add(matID, smr.sharedMaterials[j]);
                     matID++;
 
@@ -131,7 +131,7 @@ public class PickUpMaterial : MonoBehaviour
                         if (r.sharedMaterials[j] == null) continue;
 
                         _command.DrawRenderer(r, _pickupMats[matID], j);
-                        //setMaterial(_pickupMats[matID], r.sharedMaterials[j]);
+                        setMaterial(_pickupMats[matID], r.sharedMaterials[j]);
                         _matIdDic.Add(matID, r.sharedMaterials[j]);
                         matID++;
                     }
